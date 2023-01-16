@@ -58,27 +58,27 @@ criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)  
 
 # Train the model
-n_total_steps = len(train_loader)
-for epoch in range(num_epochs):
-    for i, (images, labels) in enumerate(train_loader):  
-        # origin shape: [100, 1, 28, 28]
-        # resized: [100, 784]
-        images = images.reshape(-1, 28*28).to(device)
-        labels = labels.to(device)
+# n_total_steps = len(train_loader)
+# for epoch in range(num_epochs):
+#     for i, (images, labels) in enumerate(train_loader):  
+#         # origin shape: [100, 1, 28, 28]
+#         # resized: [100, 784]
+#         images = images.reshape(-1, 28*28).to(device)
+#         labels = labels.to(device)
         
-        # Forward pass
-        outputs = model(images)
-        loss = criterion(outputs, labels)
+#         # Forward pass
+#         outputs = model(images)
+#         loss = criterion(outputs, labels)
         
-        # Backward and optimize
-        optimizer.zero_grad()
-        loss.backward()
-        optimizer.step()
+#         # Backward and optimize
+#         optimizer.zero_grad()
+#         loss.backward()
+#         optimizer.step()
         
-        if (i+1) % 100 == 0:
-            print (f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.4f}')
-# Test the model
-# In test phase, we don't need to compute gradients (for memory efficiency)
+#         if (i+1) % 100 == 0:
+#             print (f'Epoch [{epoch+1}/{num_epochs}], Step [{i+1}/{n_total_steps}], Loss: {loss.item():.4f}')
+# # Test the model
+# # In test phase, we don't need to compute gradients (for memory efficiency)
 with torch.no_grad():
     n_correct = 0
     n_samples = 0
@@ -93,3 +93,17 @@ with torch.no_grad():
         
     acc = 100.0 * n_correct / n_samples
     print(f'Accuracy of the network on the 10000 test images: {acc} %')
+FILE = "MNIST_model.pth"
+
+torch.save(model.state_dict(), FILE)
+
+print(model.state_dict())
+loaded_model = NeuralNet(input_size, hidden_size, num_classes)
+loaded_model.load_state_dict(torch.load(FILE, map_location=device))
+loaded_model.to(device)
+loaded_model.eval()
+print(loaded_model.state_dict())
+output = loaded_model(images[0])
+_, predicted = torch.max(outputs.data, 1)
+
+print('prediction',predicted ==labels[0], predicted, labels[0])
